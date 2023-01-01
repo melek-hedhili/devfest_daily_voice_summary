@@ -22,11 +22,7 @@ const App = () => {
       <NativeBaseProvider>
         <NavigationContainer ref={navigationRef}>
           <StackNavigator />
-          <AlanView
-            projectid={
-              'cd4ff1a05f843a5dbdcb2f18c880efc42e956eca572e1d8b807a3e2338fdd0dc/stage'
-            }
-          />
+          <AlanView projectid={process.env.ALAN_AI_KEY} />
         </NavigationContainer>
       </NativeBaseProvider>
     </>
