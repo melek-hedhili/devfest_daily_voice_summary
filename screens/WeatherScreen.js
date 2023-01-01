@@ -13,13 +13,25 @@ import {
 import {NativeEventEmitter, NativeModules} from 'react-native';
 
 const {AlanManager, AlanEventEmitter} = NativeModules;
-const alanEventEmitter = new NativeEventEmitter(AlanEventEmitter);
-
 const WeatherScreen = ({navigation}) => {
   const route = useRoute();
-  console.log('route', route.params);
-  const [data, setData] = useState();
-  const [refreshing, setRefreshing] = useState(false);
+  console.log('route', route.params.weather.current.weather[0].description);
+  let icon = route.params.weather.current.weather[0].icon;
+  const [city, setCity] = useState('Loading ...');
+  const [state, setState] = useState('Loading ...');
+
+  useEffect(() => {
+    const city_name_url =
+      'http://api.openweathermap.org/geo/1.0/reverse?lat=36.0123&lon=10.5149&appid=03be4bb5b66a0d881e227c0bda2241fd';
+    fetch(city_name_url)
+      .then(res => res.json())
+      .then(respone => {
+        console.log('response', respone);
+        setCity(respone[0].local_names.fr);
+        setState(respone[0].state);
+      });
+  }, []);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener('state', () => {
       const item = route.params?.weather;
@@ -60,8 +72,10 @@ const WeatherScreen = ({navigation}) => {
       <StatusBar backgroundColor="darkgray" />
 
       <ScrollView>
-        <View style={{alignItems: 'center'}}>
-          <Text style={styles.title}></Text>
+        <View style={{alignItems: 'center', marginTop: 20}}>
+          <Text style={styles.title}>
+            {city}/{state}
+          </Text>
           <View>
             <Text style={{color: 'red'}}>
               {route.params.weather.current.timezone}
@@ -69,15 +83,18 @@ const WeatherScreen = ({navigation}) => {
           </View>
         </View>
         <View style={styles.current}>
-          {/* <Image
+          <Image
             style={styles.largeIcon}
             source={{
               uri: `http://openweathermap.org/img/wn/${icon}@4x.png`,
             }}
-          /> */}
+          />
+          <Text style={styles.currentTemp}>
+            {route.params.weather.current.temp} °C
+          </Text>
         </View>
         <Text style={styles.currentDescription}>
-          {route.params.weather.current.temp} °C
+          {route.params.weather.current.weather[0].description}
         </Text>
         <View style={styles.extraInfo}>
           <View style={styles.info}>
@@ -91,10 +108,10 @@ const WeatherScreen = ({navigation}) => {
               }}
             />
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              °C
+              {route.params.weather.current.feels_like} °C
             </Text>
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              {route.params.weather.current.feels_like}
+              Feels like
             </Text>
           </View>
 
@@ -109,10 +126,10 @@ const WeatherScreen = ({navigation}) => {
               }}
             />
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              %
+              {route.params.weather.current.humidity}%
             </Text>
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              {route.params.weather.current.humidity}
+              Humidity
             </Text>
           </View>
         </View>
@@ -132,9 +149,11 @@ const WeatherScreen = ({navigation}) => {
                 fontSize: 22,
                 color: 'white',
                 textAlign: 'center',
-              }}></Text>
-            <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
+              }}>
               {route.params.weather.current.visibility}
+            </Text>
+            <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
+              Visibility
             </Text>
           </View>
 
@@ -149,11 +168,10 @@ const WeatherScreen = ({navigation}) => {
               }}
             />
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              {' '}
-              m/s
+              {route.params.weather.current.wind_speed} m/s
             </Text>
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              {route.params.weather.current.wind_speed}
+              Wind speed
             </Text>
           </View>
         </View>
@@ -169,7 +187,9 @@ const WeatherScreen = ({navigation}) => {
               }}
             />
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              {new Date(1 * 1000).toLocaleString()}
+              {new Date(
+                1000 * route.params.weather.current.sunrise,
+              ).toLocaleString()}
             </Text>
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
               Sunrise
@@ -187,7 +207,9 @@ const WeatherScreen = ({navigation}) => {
               }}
             />
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
-              {new Date(1 * 1000).toLocaleString()}
+              {new Date(
+                route.params.weather.current.sunset * 1000,
+              ).toLocaleString()}
             </Text>
             <Text style={{fontSize: 20, color: 'white', textAlign: 'center'}}>
               Sunset
@@ -240,6 +262,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: 'bold',
     textAlign: 'center',
+    color: '#767676',
   },
   currentDescription: {
     textAlign: 'center',
@@ -251,7 +274,7 @@ const styles = StyleSheet.create({
   title: {
     width: '100%',
     textAlign: 'center',
-    fontSize: 36,
+    fontSize: 30,
     fontWeight: 'bold',
     color: '#e96e50',
   },
