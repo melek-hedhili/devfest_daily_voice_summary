@@ -13,7 +13,7 @@
 -   Create a new project on [Alanai](https://alan.app/). Then add the scripts found inside Alanai foler in the directory to your [Alanai](https://alan.app/) project.
       
 
--   Create a `.env` file in the server side and store the following:
+-   Create a `.env` file in your directory and store the following:
       -   ALAN_AI_KEY=Insert the valid Alanai Key
 -   npx react-native start
 -   npx react-native run-android
